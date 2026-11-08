@@ -1,29 +1,32 @@
 {
-  "name": "flexslider",
-  "version": "2.7.2",
-  "description": "An awesome, fully responsive jQuery slider toolkit.",
-  "main": "jquery.flexslider.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "name": "flex-slider",
+  "version": "3.0.0",
+  "description": "A self-contained image slider web component with no dependencies.",
+  "type": "module",
+  "main": "flex-slider.js",
+  "module": "flex-slider.js",
+  "exports": {
+    ".": "./flex-slider.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/woothemes/FlexSlider.git"
+  "files": [
+    "flex-slider.js",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "echo \"Open test/index.html in a browser to run the suite.\" && exit 0",
+    "serve": "python3 -m http.server 8080"
   },
   "keywords": [
-    "flexslider",
-    "jquery",
     "slider",
-    "woocommerce",
-    "automattic"
+    "carousel",
+    "web-component",
+    "custom-element",
+    "shadow-dom",
+    "images"
   ],
-  "author": "Automattic <jeff@woothemes.com>",
-  "license": "GPL-2.0",
-  "bugs": {
-    "url": "https://github.com/woocommerce/FlexSlider/issues"
-  },
-  "homepage": "https://github.com/woocommerce/FlexSlider#readme",
-  "dependencies": {
-    "jquery": ">=1.11.3"
-  }
+  "license": "GPL-2.0-or-later",
+  "sideEffects": [
+    "./flex-slider.js"
+  ]
 }
