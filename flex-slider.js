@@ -55,6 +55,9 @@ const TEMPLATE = /* html */ `
     --fs-shadow: 0 1px 6px rgba(0, 0, 0, 0.18);
     display: block;
     position: relative;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
     line-height: 0;
@@ -79,9 +82,15 @@ const TEMPLATE = /* html */ `
   }
   :host([height]) .frame { height: 100%; }
 
+  /* The track is exactly the width of the frame and never grows with its
+     children. Slides size against the frame, not against the track, which is
+     what makes the slider responsive at any container width. */
   .track {
     display: flex;
     flex-direction: row;
+    flex-wrap: nowrap;
+    width: 100%;
+    max-width: 100%;
     margin: 0;
     padding: 0;
     transition-property: transform;
@@ -91,12 +100,17 @@ const TEMPLATE = /* html */ `
   }
   :host([direction="vertical"]) .track {
     flex-direction: column;
+    flex-wrap: nowrap;
   }
   .track.instant { transition: none; }
 
+  /* One slide fills the frame. flex-basis resolves against the track, which is
+     now a fixed 100% of the frame, so every slide is frame-wide and the track
+     is exactly as wide as the sum of them. */
   .slide {
     flex: 0 0 100%;
     width: 100%;
+    max-width: 100%;
     min-width: 0;
     margin: 0;
     padding: 0;
@@ -286,6 +300,7 @@ class FlexSlider extends HTMLElement {
     this._dragDelta = 0;
     this._connected = false;
     this._resizeObserver = null;
+    this._hostObserver = null;
   }
 
   /* ---------------------------------------------------------------- lifecycle */
@@ -326,12 +341,21 @@ class FlexSlider extends HTMLElement {
     });
 
     this.refresh();
+
+    // The host can change width after a late webfont, a scrollbar or a lazy
+    // image, so watch it rather than assuming the first measurement holds.
+    if (typeof ResizeObserver !== 'undefined' && ResizeObserver) {
+      this._hostObserver = new ResizeObserver(() => this._syncPosition());
+      this._hostObserver.observe(this);
+    }
   }
 
   disconnectedCallback() {
     this.pause();
     if (this._resizeObserver) this._resizeObserver.disconnect();
     this._resizeObserver = null;
+    if (this._hostObserver) this._hostObserver.disconnect();
+    this._hostObserver = null;
   }
 
   attributeChangedCallback(name) {
@@ -490,6 +514,7 @@ class FlexSlider extends HTMLElement {
     this._move(true);
 
     this._observeSize();
+    this._syncPosition();
     if (this.hasAttribute('autoplay')) this.play();
   }
 
@@ -546,6 +571,16 @@ class FlexSlider extends HTMLElement {
       this._move(true);
     });
     this._resizeObserver.observe(this._frame);
+  }
+
+  /**
+   * Re-aligns the track to the current slide from live measurements. Called on
+   * resize and after every rebuild, so a changed container width can never
+   * leave the track parked at a stale offset.
+   */
+  _syncPosition() {
+    if (this._pages.length === 0) return;
+    this._move(true);
   }
 
   _axis() {
