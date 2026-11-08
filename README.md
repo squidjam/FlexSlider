@@ -1,230 +1,176 @@
-# No longer under active development
-
-Please note that this repository is no longer actively developed. See [the discussion](https://github.com/woocommerce/woocommerce/discussions/48302). The most recent version of FlexSlider is currently incubated 
-[within WooCommerce](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/legacy/js/flexslider/jquery.flexslider.js).
-
-[![Gitter chat](https://badges.gitter.im/woothemes/FlexSlider.png)](https://gitter.im/woothemes/FlexSlider)
-
-# FlexSlider 2.7.2
-http://www.woocommerce.com/flexslider/ - Copyright (c) 2015 WooThemes
-
-## Releases
-
-The `master` branch of this repository is always the latest development version of FlexSlider. Please view the [Releases](https://github.com/woocommerce/FlexSlider/releases) section for a list of official FlexSlider builds.
-
-### Contributing
-
-We encourage contributions to FlexSlider and will review all pull requests submitted.
-
-Before contributing, please see our [Contributing Guide](https://github.com/woocommerce/FlexSlider/blob/master/CONTRIBUTING.md).
-
-### Roadmap
-
-To keep up to date with how FlexSlider's development roadmap looks, please see our [development roadmap](https://github.com/woocommerce/FlexSlider/wiki/Roadmap).
-
-## Updates
-
-** Version 2.7.2 **
-
-** Refactor jQuery HTML output for img attributes.
-
-** Version 2.7.1 **
-
-** RTL fixes for Firefox browser.
-
-** Version 2.7.0 **
-
-** Fixes resize method call for orientationchange. Adds RTL feature - param "rtl" added. **
-
-** Version 2.6.3 **
-
-** Rollback fade fixes, due to harsh fade reports. **
-
-** Version 2.6.2 **
-
-** Minor update to fix issues with varying heights and overflow onto content below the slider. Fixes the visibility of the pagination and the navigation in the "fade" mode. **
-
-** Version 2.6.1 **
-
-** SmoothHeight now uses innerHeight() instead of height() to account for padding in calculation. Defining var altText to prevent error. bower.json add fonts folder on main field. Changed true to false in order to make sure whether or not to allow a slider comprised of a single slide. **
-
-** Version 2.6.0 **
-
-** Adds composer json file, scope fix for focused keyword, fixes bower demo folder exclusion, z-index fix for disabled nav arrow, play/pause accessibility fix, itemMargin fix for slider items, fixes accessibility for in focus elements and pagination controls, firefox fix for text selection on slider carousel, adds data-thumb-alt image alt attribute. **
-
-** Version 2.5.0 **
-
-** Bumped compatibility support starting with jQuery 1.7+. pausePlay icon fix. Firefox touch event fix. Adds customDirectionNav param. **
-
-** Version 2.4.0 **
-
-** Update for improved standards. Adds classes to li nav elements. Reset for li elements in stylesheet. **
-
-** Version 2.3.0 **
-
-** Fixes pauseInvisible attribute issue with Chrome and the Page Visibility API. **
-
-** Version 2.2.2 **
-
-** Fixes minified JavaScript file to remove merge conflicts. **
-
-** Version 2.2.0 **
-
-- Fixed event handler conflicts with devices that are both click and touch enabled. e.g., Windows 8.
-- Made all slider variables public, stored in `slider.vars`. This allows manipulation of `slider.vars.minItems` and `slider.vars.maxItems` on the fly to create different fluid grids at certain breakpoints. [Check out this example demonstrating a basic technique](http://flexslider.woothemes.com/dynamic-carousel-min-max.html)
-- Fixed calculations that were causing strange issues with paging and certain FlexSliders to move out of alignment.
-
-*Be sure to test v2.2.0 with your current slider, before pushing live, to ensure everything is playing nicely.*
-
------
-
-## General Notes
-FlexSlider is no longer licensed under the MIT license. FlexSlider now uses the license, GPLv2 and later.
-
-In an effort to move the plugin forward, support for jQuery 1.4.2 has been dropped. The plugin now requires jQuery 1.7.0+. If you don't have access to the later versions of jQuery, [FlexSlider 1.8](https://github.com/woocommerce/FlexSlider/tree/flexslider1) should be a perfectly suitable substitute for your needs!
-
-Your old styles and properties *might not work out of the box*. Some property names have been changed, noted below, as well as namespacing prefixes being applied to all elements. This means that `.flex-direction-nav .next` is now `.flex-direction-nav .flex-next` by default. The namespacing property is exposed, free for you to change.
-
-No more overflow hidden woes! The plugin now generates a viewport element to handle the tedious task of working around overflow hidden. Yay!
-
-The slider element is now accessible outside of the callback API via the jQuery .data() method. Example use: `$('#slider').data('flexslider')`
-
-Helper strings have been added for performing actions quickly on FlexSlider elements. Example uses:
-
-- `$('#slider').flexslider("play")  //Play slideshow`
-- `$('#slider').flexslider("pause") //Pause slideshow`
-- `$('#slider').flexslider("stop") //Stop slideshow`
-- `$('#slider').flexslider("next")  //Go to next slide`
-- `$('#slider').flexslider("prev")  //Go to previous slide`
-- `$('#slider').flexslider(3)       //Go fourth slide`
-
-Two new methods are available for adding/removing slides, `slider.addSlide()` and `slider.removeSlide()`. More details about this coming soon.
-
-- `slider.addSlide(obj, pos)` accepts two parameters, a string/jQuery object and an index.
-- `slider.removeSlide(obj)` accepts one parameter, either an object to be removed, or an index.
-
-## Examples
-
-- [Basic Slider](http://flexslider.woothemes.com/)
-- [Basic Slider customDirectionNav](http://flexslider.woothemes.com/basic-slider-with-custom-direction-nav.html)
-- [Basic Slider with Simple Caption](http://flexslider.woothemes.com/basic-slider-with-caption.html)
-- [Slider w/thumbnail controlNav pattern](http://flexslider.woothemes.com/thumbnail-controlnav.html)
-- [Slider w/thumbnail slider](http://flexslider.woothemes.com/thumbnail-slider.html)
-- [Basic Carousel](http://flexslider.woothemes.com/basic-carousel.html)
-- [Carousel with min and max ranges](http://flexslider.woothemes.com/carousel-min-max.html)
-- [Carousel with min and max ranges](http://flexslider.woothemes.com/dynamic-carousel-min-max.html)
-- [Video with Vimeo API](http://flexslider.woothemes.com/video.html)
-- [Video with Wistia API](http://flexslider.woothemes.com/video-wistia.html)
-
-## RTL Examples
-
-- [Basic Slider](http://flexslider.woothemes.com/index-rtl.html)
-- [Slider with Simple Caption w/thumbnail slider](http://flexslider.woothemes.com/asnavfor-rtl.html)
-- [Basic Slider with Simple Caption](http://flexslider.woothemes.com/basic-carousel-rtl.html)
-
-## Properties
-
-### namespace: *{new}*
-`namespace` controls the prefixes attached to elements created by the plugin. In previous releases, only certain elements were tagged with a prefix class, which was causing class generalization issues for some users. FlexSlider now prefixes all generated elements with the appropriate namespace.
-
-*Hint: `namespace` can be an empty string.*
-
-### selector: *{new}*
-The markup structure for FlexSlider has been limited to a "ul.slide li" pattern in previous versions of FlexSlider; no longer. You can now take full control of the markup structure used for your FlexSlider. The `selector` pattern "{container} > {slide}" is mandatory, allowing the plugin to predictably interpret the selector property. Omitting the ">" from the selector is not suggested, but is possible if your markup doesn't follow the immediate descendant pattern.
-
-*Examples: "section > article", ".slides > .slide", "#hero .slide"*
-
-### easing: *{new}*
-`easing` allows support for jQuery easing! Default options provided by jQuery are "swing" and "linear," but more can be used by included the jQuery Easing plugin. *If you chose a non-existent easing method, the slider will break.*
-
-*Note: You need to set `useCSS: false` to force transitions in browsers that support translate3d.*
-*Optional: [jQuery Easing Plugin](http://gsgd.co.uk/sandbox/jquery/easing/)*
-
-### direction: *{changed}*
-Previously called "slideDirection" in v1.8 and below.
-
-### reverse: *{new}*
-`reverse` will reverse the animation direction of the slider. Meaning, horizontal sliders can move from right to left, and vertical sliders can move bottom to top.
-
-### smoothHeight: *{new}*
-`smoothHeight` allows for smooth height transitions between slides. This property currently works for the fade and horizontal slide animation. The property has no effect on horizontal sliding carousels, however.
-
-### startAt: *{changed}*
-Previously called "slideToStart" in v1.8 and below.
-
-### animationSpeed: *{changed}*
-Previously called "animationDuration" in v1.8 and below.
-
-### initDelay: *{new}*
-`initDelay` will delay the initial slideshow of a slider, given in milliseconds. The slider will still initialize, generating controls and displaying the first image, but the slideshow will wait until the `initDelay` time has completed before starting the slideshow.
-
-### useCSS: *{new}*
-`useCSS` allow users to override using CSS3 for animation. Translate3d still has numerous bugs that can crop up and wreak havoc, so this is a great property to play with if you are experiencing unexplainable issues in Webkit browsers.
-
-*Hint: Use conditionals to enable/disable the use of CSS3 on desktops and mobile devices. Mobile devices, in my experience, do not share many of the translate3d bugs seen on desktop browsers.*
-
-### touch: *{new}*
-`touch` allows users to exclude touch swipe functionality from their sliders.
-
-### keyboard: *{changed}*
-Previously called "keyboardNav" in v1.8 and below.
-
-### multipleKeyboard *{new}*
-`multipleKeyboard` allows users to override the default plugin keyboard behavior, enabling keyboard control of more than one slider on the page. This means that all visible sliders will animate, at the same time, via keyboard input.
-
-*Hint: You can use `multipleKeyboard` to allow keyboard navigation on pages where multiple sliders are present, but only one is visible.*
-
-### mousewheel: *{updated}*
-`mousewheel` now requires the jQuery Mousewheel plugin. There are a few reasons for this, but primarily because there is no need for FlexSlider itself to reinvent the awkward complexity of mousewheel interactivity that is handled perfectly by the Mousewheel plugin.
-
-*Required: [jQuery Mousewheel Plugin](https://github.com/brandonaaron/jquery-mousewheel)*
-
-### controlsContainer: *{updated}*
-`controlsContainer` is one of the more painstaking, potentially confusing properties within FlexSlider. First, the property is no longer required to workaround `overflow: hidden` on slide animation. Second, the property now accepts a **jQuery object**, giving you precise control over the object you want. The plugin no longer attempts to guess what element you are selecting.
-
-### customDirectionNav: *{new}*
-`customDirectionNav` allows the ability to add custom directional navigation elements. Can be used in conjunction with controlsContainer for pagination controls container.
-
-*[Example of customDirectionNav being used](http://flexslider.woothemes.com/basic-slider-with-custom-direction-nav.html)*
-
-### sync: *{new}*
-`sync` is a new property that will allow other slider(s) to hook into the current slider via a given selector. The selector should describe an object that has already been initialized as a FlexSlider. Right now, `sync` will synchronize animation, play, and pause behaviors. More behaviors can be added in the future as the property matures.
-
-*[Example of sync being used](http://flex.madebymufffin.com/examples/basic-carousel.html)*
-
-### asNavFor: *{new}*
-Description to be added.
-
-### itemWidth: *{new}*
-`itemWidth` is the primary property for the new carousel options. Without this property, your slider is not considered a carousel. To use `itemWidth`, give an integer value of the width of your individual slides. This should include borders and paddings applied to your slides; a total width measurement.
-
-### itemMargin: *{new}*
-`itemMargin` describes the gutter between the slide elements. If each slide has a margin-left of 10px, your itemMargin value would be 10. If elements have margin: 0 10px, your itemMargin would be 20.
-
-### minItems: *{new}*
-`minItems` describes the minimum number of slide elements that should be visible in the carousel. When the slider reaches the minimum item count, the slides will resize fluidly with the slider.
-
-### maxItems: *{new}*
-`maxItems` describes the maximum number of slide elements that should be visible in the carousel. When the slider reaches the maximum item count, the slides will resize fluidly with the sider.
-
-### move: *{new}*
-`move` determines how many slides should be animated within the carousel. When left at 0, the slider will animate the number of visible slides. If any value greater than 0 is given, the slider will animate that number of slides in the carousel on each animation interval.
-
-*Hint: The move property will be ignored if the value is higher than the number of visible slides, which can be utilized in responsive design.*
-
-### added: *{new}*
-`added()` is a new callback event fired in the new slider.addSlide() function.
-
-### removed: *{new}*
-`removed()` is a new callback event fired in the new slider.removeSlide() function.
-
-### allowOneSlide: *{new}*
-Boolean. Whether or not you'd like FlexSlider to initialize as usual if only one slide is present.
-
-### rtl: *{new}*
-Boolean. False by default. Supports RTL functionality in the slider.
-*Note: you must add `style="direction:rtl"` to your container div in order for this to work.*
-
-### isFirefox: *{new}*
-Boolean. False by default. Set to true if the Firefox browser is in use.
-*Note: used for RTL compatibility logic.*
+# &lt;flex-slider&gt;
+
+A self-contained image slider web component — a dependency-free rewrite of the
+classic [FlexSlider 2](https://github.com/squidjam/FlexSlider) image slider as a
+single custom element.
+
+Drop plain `<img>` tags inside the element and it becomes a slider. No jQuery, no
+stylesheet to load, no icon font, no build step.
+
+```html
+<script type="module" src="flex-slider.js"></script>
+
+<flex-slider animation="slide" nav pager autoplay interval="4500" pause-on-hover>
+  <img src="slide-1.jpg" alt="First slide">
+  <img src="slide-2.jpg" alt="Second slide">
+  <img src="slide-3.jpg" alt="Third slide">
+</flex-slider>
+```
+
+Open [`demo/flex-slider.html`](demo/flex-slider.html) for a live showcase of every
+option, or run the test suite by serving the repo and opening
+[`test/index.html`](test/index.html).
+
+## How it works
+
+The element takes every `<img>` descendant, reads its `src` and `alt`, and builds
+an inert shadow-DOM track beside the slotted images. The originals stay in the
+light DOM as the source of truth but are marked `inert` and `aria-hidden`, so they
+are never announced twice or reached by the tab key. Each visible slide is a
+passive copy — nothing inside the track can steal a click.
+
+All markup and CSS live in the shadow root, so the component cannot leak styles
+into the page and page styles cannot reach in. Theming happens through CSS custom
+properties and `::part()`, both of which cross the shadow boundary on purpose.
+
+The track is measured with `offsetLeft` / `offsetTop` rather than assumed from
+image widths, so arbitrary image sizes and any container width work without
+extra configuration. Adding or removing an image rebuilds the slider
+automatically; call `refresh()` if you change a `src` in place.
+
+## Attributes
+
+| Attribute | Values | Default | Notes |
+| --- | --- | --- | --- |
+| `animation` | `slide`, `fade` | `slide` | `fade` stacks slides and cross-fades |
+| `duration` | ms | `700` | transition duration |
+| `easing` | any CSS timing function | `ease` | |
+| `autoplay` | present | off | starts a slideshow |
+| `interval` | ms | `5000` | time between slides |
+| `pause-on-hover` | present | off | pauses while the pointer is over it |
+| `nav` | present | off | previous/next arrows |
+| `pager` | present | off | dot or thumbnail pager |
+| `thumbs` | present | off | pager renders image thumbnails |
+| `slide-show-at` | index, 0-based | `0` | slide to start on |
+| `direction` | `horizontal`, `vertical` | `horizontal` | axis the track moves along |
+| `reverse` | present | off | animates the other way |
+| `rtl` | present | off | mirrors arrows and layout |
+| `swipe` | `on`, `off` | on | drag or swipe to change slides |
+| `keyboard` | `on`, `off` | on | arrows, Home and End when focused |
+| `smooth-height` | present | off | animates the container height |
+| `height` | any CSS length | auto | fixed box; images crop with `object-fit: cover` |
+| `theme` | `light`, `dark` | `light` | arrow and pager colours |
+| `loop` | present | off | wraps past the last slide |
+| `label` | string | none | accessible name for the region |
+| `prev-label`, `next-label` | string | "Previous/Next slide" | arrow button labels |
+
+Booleans are presence-based: `nav` turns arrows on, leaving it out turns them off.
+
+## Methods, properties and events
+
+```js
+const slider = document.querySelector('flex-slider');
+
+slider.next();          // advance one slide
+slider.prev();          // go back one slide
+slider.goTo(3);         // go to index 3
+slider.play();          // start the slideshow
+slider.pause();         // stop it
+slider.refresh();       // re-read the slotted images
+slider.reset();         // back to the first slide, slideshow stopped
+
+slider.currentIndex;    // getter, and settable
+slider.slides;          // the original <img> elements
+
+slider.addEventListener('slide-start', (e) => {
+  console.log(e.detail.index, e.detail.slide, e.detail.count);
+});
+slider.addEventListener('slide-end', (e) => { /* transition finished */ });
+```
+
+`slide-start` and `slide-end` both bubble and cross the shadow boundary, and both
+carry `{ index, slide, count }`. They replace FlexSlider's `start`, `before` and
+`after` callbacks.
+
+## Theming
+
+Override the custom properties on the host:
+
+```css
+flex-slider {
+  --fs-accent: #c2410c;
+  --fs-arrow-bg: rgba(255, 255, 255, .9);
+  --fs-arrow-fg: #c2410c;
+  --fs-dot: rgba(255, 255, 255, .5);
+  --fs-dot-active: #fff;
+  --fs-radius: 12px;
+}
+```
+
+For anything deeper, the shadow parts are `frame`, `track`, `pager`, `arrow-prev`
+and `arrow-next`:
+
+```css
+flex-slider::part(frame) { border-radius: 12px; }
+flex-slider::part(arrow-next) { width: 48px; height: 48px; }
+```
+
+## Testing
+
+The suite in [`test/`](test/) runs in a real browser, because that is the only
+environment where a web component can genuinely be verified — real layout, real
+transitions, real events.
+
+```sh
+python3 -m http.server 8080
+# then open http://localhost:8080/test/index.html
+```
+
+It covers construction, layout geometry, navigation, pointer gestures, animation,
+the slideshow, events, accessibility, theming and live updates, and prints a
+pass/fail summary on the page. There are no dependencies and no test framework:
+`index.html` loads the component and the fixtures, `harness.js` provides the
+runner and assertions, and `suite.js` holds the cases. The verdict is also
+published on `window.__flexSliderTests` for anyone wiring this into CI.
+
+## Browser support
+
+Custom elements v1, Shadow DOM v1, CSS transitions, `ResizeObserver` and Pointer
+Events — current Chrome, Edge, Firefox and Safari, plus recent iOS and Android
+browsers. If you must support older browsers, keep a legacy slider for those
+clients behind a feature check.
+
+## Migration from FlexSlider 2
+
+| FlexSlider 2 | `<flex-slider>` |
+| --- | --- |
+| `$('.flexslider').flexslider({...})` | write `<flex-slider>` attributes |
+| `animation: "slide"` | `animation="slide"` |
+| `animationSpeed: 600` | `duration="600"` |
+| `slideshow: true` | `autoplay` |
+| `slideshowSpeed: 7000` | `interval="7000"` |
+| `pauseOnHover: true` | `pause-on-hover` |
+| `directionNav: true` | `nav` |
+| `controlNav: true` | `pager` |
+| `controlNav: "thumbnails"` | `pager thumbs` |
+| `startAt: 2` | `slide-show-at="2"` |
+| `direction: "vertical"` | `direction="vertical"` |
+| `smoothHeight: true` | `smooth-height` |
+| `touch: false` | `swipe="off"` |
+| `keyboard: true` | `keyboard` (on by default) |
+| `rtl: true` | `rtl` |
+| `namespace`, `selector` | not needed — structure is fixed |
+| `useCSS`, `easing`, `mousewheel`, `video` | dropped — native CSS transitions only |
+| `start` / `before` / `after` callbacks | `slide-start` / `slide-end` events |
+| `$el.data('flexslider')` | the element itself is the API |
+| `initDelay`, `randomize` | dropped |
+
+Carousel mode (`itemWidth`, `itemMargin`, `minItems`, `maxItems`, `move`) and the
+Vimeo/Wistia video slides are intentionally out of scope: this rewrite covers the
+image slider, which is what FlexSlider was overwhelmingly used for.
+
+## Licence
+
+GPL-2.0-or-later. This component is derived from FlexSlider 2,
+© 2012 WooThemes, contributing author Tyler Smith, and is distributed under the
+same licence. See [LICENSE.md](LICENSE.md).
