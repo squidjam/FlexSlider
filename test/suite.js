@@ -64,6 +64,8 @@ group('Layout');
 await test('the active slide is actually in view', async () => {
   const slider = reset('fx-plain');
   await settle();
+  assert.equal(getComputedStyle(shadow(slider).querySelector('slot')).display, 'none',
+    'source images do not participate in the rendered track');
   const frame = shadow(slider).querySelector('.frame');
   const active = activeSlide(slider);
   const frameBox = frame.getBoundingClientRect();
@@ -93,6 +95,30 @@ await test('every slide has equal width', async () => {
   await settle();
   const widths = [...shadow(slider).querySelectorAll('.slide')].map((s) => s.getBoundingClientRect().width);
   widths.forEach((w, i) => assert.almost(w, widths[0], 1, `slide ${i} width`));
+});
+
+await test('RTL layout aligns the active slide and moves in reverse', async () => {
+  const slider = reset('fx-plain');
+  slider.setAttribute('rtl', '');
+  await settle();
+  slider.goTo(1);
+  await settle(700);
+  const frame = shadow(slider).querySelector('.frame').getBoundingClientRect();
+  const active = activeSlide(slider).getBoundingClientRect();
+  assert.almost(active.left, frame.left, 2, 'active slide aligns with the frame');
+  assert.ok(transformX(slider) > 0, 'RTL advances toward the right');
+});
+
+await test('reverse layout aligns the active slide and moves in reverse', async () => {
+  const slider = reset('fx-plain');
+  slider.setAttribute('reverse', '');
+  await settle();
+  slider.goTo(1);
+  await settle(700);
+  const frame = shadow(slider).querySelector('.frame').getBoundingClientRect();
+  const active = activeSlide(slider).getBoundingClientRect();
+  assert.almost(active.left, frame.left, 2, 'active slide aligns with the frame');
+  assert.ok(transformX(slider) > 0, 'reverse advances toward the right');
 });
 
 await test('a fixed height crops rather than squashing', async () => {
@@ -462,6 +488,31 @@ await test('adding an image rebuilds the track', async () => {
   slider.appendChild(extra);
   await tick(60);
   assert.equal(shadow(slider).querySelectorAll('.slide').length, 4, 'the new slide is built');
+});
+
+await test('documented attributes update after connection', async () => {
+  const slider = reset('fx-plain');
+  const pager = shadow(slider).querySelector('.pager');
+  slider.setAttribute('pager', '');
+  assert.equal(pager.hidden, false, 'adding pager shows it');
+  slider.removeAttribute('pager');
+  assert.equal(pager.hidden, true, 'removing pager hides it');
+
+  slider.setAttribute('prev-label', 'Back');
+  assert.equal(shadow(slider).querySelector('.arrow.prev').getAttribute('aria-label'), 'Back',
+    'changing the previous label updates its button');
+  slider.setAttribute('slide-show-at', '2');
+  assert.equal(slider.currentIndex, 2, 'changing the start index moves to that slide');
+});
+
+await test('refresh uses an image source changed in place', async () => {
+  const slider = reset('fx-plain');
+  const source = IMGS('fx-plain')[0];
+  const updatedSrc = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
+  source.setAttribute('src', updatedSrc);
+  slider.refresh();
+  assert.equal(shadow(slider).querySelector('.slide img').getAttribute('src'), updatedSrc,
+    'the rebuilt slide uses the current src attribute');
 });
 
 await test('removing every image tears the slider down cleanly', async () => {

@@ -81,6 +81,7 @@ const TEMPLATE = /* html */ `
     user-select: none;
   }
   :host([height]) .frame { height: 100%; }
+  :host([height]) .track { height: 100%; }
 
   /* The track is exactly the width of the frame and never grows with its
      children. Slides size against the frame, not against the track, which is
@@ -89,6 +90,7 @@ const TEMPLATE = /* html */ `
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
+    align-items: flex-start;
     width: 100%;
     max-width: 100%;
     margin: 0;
@@ -102,7 +104,12 @@ const TEMPLATE = /* html */ `
     flex-direction: column;
     flex-wrap: nowrap;
   }
+  :host([rtl]:not([direction="vertical"]):not([reverse])) .track,
+  :host(:not([rtl]):not([direction="vertical"])[reverse]) .track {
+    flex-direction: row-reverse;
+  }
   .track.instant { transition: none; }
+  slot { display: none; }
 
   /* One slide fills the frame. flex-basis resolves against the track, which is
      now a fixed 100% of the frame, so every slide is frame-wide and the track
@@ -190,7 +197,12 @@ const TEMPLATE = /* html */ `
   .arrow.next { right: 9px; }
   .arrow[disabled] { opacity: 0; pointer-events: none; }
   .arrow svg { width: 17px; height: 17px; fill: currentColor; }
-  :host([rtl]) .arrow svg { transform: scaleX(-1); }
+  :host([rtl]:not([reverse])) .arrow svg,
+  :host(:not([rtl])[reverse]) .arrow svg { transform: scaleX(-1); }
+  :host([rtl]:not([reverse])) .arrow.prev,
+  :host(:not([rtl])[reverse]) .arrow.prev { left: auto; right: 9px; }
+  :host([rtl]:not([reverse])) .arrow.next,
+  :host(:not([rtl])[reverse]) .arrow.next { right: auto; left: 9px; }
 
   @media (max-width: 860px), (hover: none) {
     .arrow { opacity: 0.9; }
@@ -375,11 +387,25 @@ class FlexSlider extends HTMLElement {
         else this.pause();
         break;
       case 'nav':
+      case 'prev-label':
+      case 'next-label':
         this._renderArrows();
         break;
+      case 'pager':
       case 'thumbs':
         this._buildPager();
         this._move(true);
+        break;
+      case 'rtl':
+      case 'reverse':
+      case 'loop':
+        this._move(true);
+        break;
+      case 'slide-show-at':
+        this.goTo(parseInt(this.getAttribute(name), 10) || 0, { instant: true });
+        break;
+      case 'interval':
+        if (this._playing) this.play();
         break;
       case 'smooth-height':
       case 'smoothHeight':
@@ -439,7 +465,8 @@ class FlexSlider extends HTMLElement {
     this.clearDelay();
     this._playing = true;
     this._wasPlaying = true;
-    const interval = Math.max(1000, Number(this.getAttribute('interval')) || 5000);
+    const rawInterval = Number(this.getAttribute('interval'));
+    const interval = Number.isFinite(rawInterval) && rawInterval > 0 ? rawInterval : 5000;
     this._timer = setInterval(() => {
       if (this.hasAttribute('loop') || this._index < this._pages.length - 1) this.next();
       else this.pause();
@@ -462,7 +489,7 @@ class FlexSlider extends HTMLElement {
   /** Re-read the slotted images and rebuild the track from scratch. */
   refresh() {
     const originals = this.slides;
-    const sources = originals.map((img) => img.currentSrc || img.getAttribute('src') || '');
+    const sources = originals.map((img) => img.getAttribute('src') || img.currentSrc || '');
     const alts = originals.map((img) => img.getAttribute('alt') || '');
 
     // Tear down the previous render.
@@ -535,9 +562,15 @@ class FlexSlider extends HTMLElement {
   }
 
   _applyLayout() {
-    const duration = Number(this.getAttribute('duration')) || 700;
+    const rawDuration = Number(this.getAttribute('duration'));
+    const duration = Number.isFinite(rawDuration) && rawDuration >= 0 ? rawDuration : 700;
+    const easing = this.getAttribute('easing') || 'ease';
     this._track.style.transitionDuration = `${duration}ms`;
-    this._track.style.transitionTimingFunction = this.getAttribute('easing') || 'ease';
+    this._track.style.transitionTimingFunction = easing;
+    this._pages.forEach((page) => {
+      page.style.transitionDuration = `${duration}ms`;
+      page.style.transitionTimingFunction = easing;
+    });
     this._track.setAttribute('aria-live', this._playing ? 'off' : 'polite');
     this._applyHeight();
     this._applyLabel();
@@ -550,11 +583,18 @@ class FlexSlider extends HTMLElement {
       this._frame.style.transition = 'none';
       return;
     }
-    if (this.hasAttribute('smooth-height')) {
-      this._frame.style.transition = 'height 0.45s ease';
+    const smooth = this.hasAttribute('smooth-height');
+    const vertical = this._axis() === 'Y';
+    this._frame.style.transition = smooth
+      ? `height ${this._track.style.transitionDuration || '700ms'} ${this._track.style.transitionTimingFunction || 'ease'}`
+      : 'none';
+
+    if (smooth || vertical) {
+      const active = this._pages[this._index];
+      const height = active ? active.getBoundingClientRect().height : 0;
+      if (height > 0) this._frame.style.height = `${height}px`;
     } else {
       this._frame.style.height = '';
-      this._frame.style.transition = 'none';
     }
   }
 
@@ -571,6 +611,7 @@ class FlexSlider extends HTMLElement {
       this._move(true);
     });
     this._resizeObserver.observe(this._frame);
+    this._resizeObserver.observe(this._track);
   }
 
   /**
@@ -589,16 +630,14 @@ class FlexSlider extends HTMLElement {
 
   _offsetOf(element) {
     if (this._axis() === 'Y') return element.offsetTop || 0;
-    const left = element.offsetLeft || 0;
-    return this.getAttribute('rtl') === null ? left : -left;
+    return element.offsetLeft || 0;
   }
 
   _move(instant = false) {
     const active = this._pages[this._index];
     if (!active) return;
 
-    const flip = this.hasAttribute('reverse') && this._axis() === 'X' ? -1 : 1;
-    const distance = this._offsetOf(active) * flip;
+    const distance = this._offsetOf(active);
 
     if (instant) {
       this._track.classList.add('instant');
@@ -673,7 +712,9 @@ class FlexSlider extends HTMLElement {
 
   _onKeydown(event) {
     if (this.getAttribute('keyboard') === 'off') return;
-    const flip = this.getAttribute('rtl') !== null ? -1 : 1;
+    const reversed = this._axis() === 'X'
+      && (this.hasAttribute('rtl') !== this.hasAttribute('reverse'));
+    const flip = reversed ? -1 : 1;
     switch (event.key) {
       case 'ArrowRight':
         event.preventDefault();
@@ -738,9 +779,13 @@ class FlexSlider extends HTMLElement {
     const size = this._axis() === 'Y' ? this._frame.offsetHeight : this._frame.offsetWidth;
     const threshold = Math.max(40, (size || 0) * 0.15);
 
-    if (this._dragDelta < -threshold && this._index < this._pages.length - 1) {
+    const reversed = this._axis() === 'X'
+      && (this.hasAttribute('rtl') !== this.hasAttribute('reverse'));
+    const forward = reversed ? this._dragDelta > threshold : this._dragDelta < -threshold;
+    const backward = reversed ? this._dragDelta < -threshold : this._dragDelta > threshold;
+    if (forward) {
       this.next();
-    } else if (this._dragDelta > threshold && this._index > 0) {
+    } else if (backward) {
       this.prev();
     } else {
       this._move(false);

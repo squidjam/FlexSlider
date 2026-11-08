@@ -11,12 +11,8 @@
   "files": [
     "flex-slider.js",
     "README.md",
-    "LICENSE"
+    "LICENSE.md"
   ],
-  "scripts": {
-    "test": "echo \"Open test/index.html in a browser to run the suite.\" && exit 0",
-    "serve": "python3 -m http.server 8080"
-  },
   "keywords": [
     "slider",
     "carousel",
