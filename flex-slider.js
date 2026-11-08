@@ -489,6 +489,7 @@ class FlexSlider extends HTMLElement {
   /** Re-read the slotted images and rebuild the track from scratch. */
   refresh() {
     const originals = this.slides;
+    const previousIndex = this._pages.length > 0 ? this._index : null;
     const sources = originals.map((img) => img.getAttribute('src') || img.currentSrc || '');
     const alts = originals.map((img) => img.getAttribute('alt') || '');
 
@@ -506,6 +507,7 @@ class FlexSlider extends HTMLElement {
     });
 
     if (sources.length === 0) {
+      this._index = 0;
       this._renderArrows();
       this._buildPager();
       return;
@@ -536,7 +538,9 @@ class FlexSlider extends HTMLElement {
     this._renderArrows();
 
     const startAt = clamp(parseInt(this.getAttribute('slide-show-at'), 10) || 0, 0, sources.length - 1);
-    this._index = startAt;
+    this._index = previousIndex === null
+      ? startAt
+      : clamp(previousIndex, 0, sources.length - 1);
     this._move(true);
 
     this._observeSize();

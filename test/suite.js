@@ -501,12 +501,14 @@ group('Live updates');
 
 await test('adding an image rebuilds the track', async () => {
   const slider = reset('fx-plain');
+  slider.currentIndex = 2;
   const extra = document.createElement('img');
   extra.setAttribute('src', IMGS('fx-plain')[0].getAttribute('src'));
   extra.setAttribute('alt', 'Slide D');
   slider.appendChild(extra);
   await tick(60);
   assert.equal(shadow(slider).querySelectorAll('.slide').length, 4, 'the new slide is built');
+  assert.equal(slider.currentIndex, 2, 'refresh preserves the current slide');
 });
 
 await test('refresh does not retrigger slotchange', async () => {

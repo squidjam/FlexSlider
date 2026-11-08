@@ -509,14 +509,12 @@ curl -O https://squidjam.github.io/FlexSlider/flex-slider.js</pre>
     img.alt = `${alt} (added ${next})`;
     img.dataset.added = 'true';
     live.appendChild(img);
-    img.complete ? live.refresh() : img.addEventListener('load', () => live.refresh(), { once: true });
   });
 
   document.getElementById('remove-image').addEventListener('click', () => {
     const added = live.querySelectorAll('img[data-added]');
     if (added.length === 0) return;
     added[added.length - 1].remove();
-    live.refresh();
     next = Math.max(0, next - 1);
   });
 </script>
