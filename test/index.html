@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>&lt;flex-slider&gt; test suite</title>
+  <style>
+    body { font: 15px/1.55 system-ui, sans-serif; margin: 0; padding: 32px 20px; background: #f6f6f4; color: #222; }
+    main { max-width: 900px; margin: 0 auto; }
+    h1 { font-size: 20px; margin: 0 0 4px; }
+    #summary { font-size: 14px; margin: 0 0 24px; color: #666; }
+    #summary.pass { color: #17652c; font-weight: 600; }
+    #summary.fail { color: #a4161a; font-weight: 600; }
+    .group { font-size: 12px; text-transform: uppercase; letter-spacing: .07em; color: #888; margin: 26px 0 8px; }
+    .case { padding: 5px 10px; border-left: 3px solid transparent; background: #fff; margin-bottom: 3px; border-radius: 0 4px 4px 0; }
+    .case.pass { border-left-color: #2e9e4f; }
+    .case.fail { border-left-color: #cf2233; background: #fff5f5; }
+    .case .name { font-weight: 500; }
+    .case .why { display: block; margin-top: 3px; color: #a4161a; font-size: 13px; font-family: ui-monospace, monospace; white-space: pre-wrap; }
+    #fixtures { position: absolute; left: -10000px; top: 0; width: 640px; }
+    footer { margin-top: 28px; color: #777; font-size: 13px; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>&lt;flex-slider&gt; test suite</h1>
+  <p id="summary">running…</p>
+  <div id="results"></div>
+  <footer>These tests run against the real DOM and real layout in your browser — the only place a web component can genuinely be verified.</footer>
+</main>
+
+<!--
+  Fixtures live off-screen but *rendered*: display:none would give every element
+  zero geometry and the layout assertions would be meaningless.
+-->
+<div id="fixtures" aria-hidden="true">
+  <flex-slider id="fx-plain">
+    <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='300'><rect width='600' height='300' fill='%23ccd5ae'/></svg>" alt="Slide A">
+    <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='300'><rect width='600' height='300' fill='%23a3b18a'/></svg>" alt="Slide B">
+    <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='300'><rect width='600' height='300' fill='%23588f6b'/></svg>" alt="Slide C">
+  </flex-slider>
+
+  <flex-slider id="fx-options" nav pager autoplay interval="1000" pause-on-hover label="Options slider">
+    <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='300'><rect width='600' height='300' fill='%23bc6c25'/></svg>" alt="One">
+    <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='300'><rect width='600' height='300' fill='%23dda15e'/></svg>" alt="Two">
+    <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='300'><rect width='600' height='300' fill='%2360652b'/></svg>" alt="Three">
+  </flex-slider>
+
+  <flex-slider id="fx-fade" animation="fade" pager slide-show-at="2">
+    <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='300'><rect width='600' height='300' fill='%231d3557'/></svg>" alt="Fade one">
+    <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='300'><rect width='600' height='300' fill='%234577b1'/></svg>" alt="Fade two">
+    <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='300'><rect width='600' height='300' fill='%23a8dadc'/></svg>" alt="Fade three">
+  </flex-slider>
+
+  <flex-slider id="fx-loop" nav loop>
+    <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='300'><rect width='600' height='300' fill='%23ffb703'/></svg>" alt="Loop one">
+    <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='300'><rect width='600' height='300' fill='%23fb8500'/></svg>" alt="Loop two">
+  </flex-slider>
+
+  <flex-slider id="fx-thumbs" pager thumbs theme="dark" height="320px">
+    <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='300'><rect width='600' height='300' fill='%239d0200'/></svg>" alt="Thumb one">
+    <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='300'><rect width='600' height='300' fill='%23bc4749'/></svg>" alt="Thumb two">
+    <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='300'><rect width='600' height='300' fill='%23f2e8cf'/></svg>" alt="Thumb three">
+  </flex-slider>
+
+  <flex-slider id="fx-vertical" direction="vertical" pager height="360px">
+    <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='300'><rect width='600' height='300' fill='%232a9d8f'/></svg>" alt="Vertical one">
+    <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='300'><rect width='600' height='300' fill='%23264653'/></svg>" alt="Vertical two">
+    <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='300'><rect width='600' height='300' fill='%23e9c46a'/></svg>" alt="Vertical three">
+  </flex-slider>
+
+  <flex-slider id="fx-single" pager nav>
+    <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='300'><rect width='600' height='300' fill='%237b2cbf'/></svg>" alt="Only">
+  </flex-slider>
+
+  <flex-slider id="fx-noswipe" swipe="off" nav>
+    <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='300'><rect width='600' height='300' fill='%23414141'/></svg>" alt="No swipe one">
+    <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='300'><rect width='600' height='300' fill='%23333333'/></svg>" alt="No swipe two">
+  </flex-slider>
+</div>
+
+<script type="module">
+import '../flex-slider.js';
+import { run } from './harness.js';
+await run();
+</script>
+</body>
+</html>

@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>flex-slider — a self-contained image slider</title>
+  <meta name="description" content="A dependency-free image slider web component. Drop images inside an element; it becomes a slider.">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
+      margin: 0;
+      background: #0f1115;
+      color: #e8e8ea;
+      -webkit-font-smoothing: antialiased;
+    }
+    .wrap { max-width: 940px; margin: 0 auto; padding: 0 24px; }
+
+    header {
+      padding: 72px 0 32px;
+      background:
+        radial-gradient(900px 380px at 20% -10%, rgba(120, 190, 255, .16), transparent 60%),
+        radial-gradient(700px 320px at 85% 0%, rgba(255, 170, 120, .13), transparent 60%);
+    }
+    .eyebrow {
+      font-size: 12px; letter-spacing: .16em; text-transform: uppercase;
+      color: #8b93a7; margin: 0 0 14px;
+    }
+    h1 { font-size: clamp(30px, 5vw, 46px); line-height: 1.1; margin: 0 0 14px; letter-spacing: -.02em; }
+    h1 span { color: #6db3ff; }
+    .lede { font-size: 18px; color: #a9b0c0; max-width: 60ch; margin: 0 0 22px; }
+    .pill-row { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; padding: 0; margin: 0; }
+    .pill {
+      font-size: 13px; padding: 4px 11px; border-radius: 999px;
+      background: #1a1e27; border: 1px solid #262c38; color: #b9c0d0;
+    }
+
+    section { padding: 44px 0; border-top: 1px solid #1b1f28; }
+    h2 { font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: #8b93a7; margin: 0 0 6px; }
+    .title { font-size: 24px; margin: 0 0 8px; letter-spacing: -.01em; }
+    .note { color: #9aa3b4; margin: 0 0 22px; max-width: 64ch; }
+    .note code, td code, pre code { color: #86c9ff; }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: .89em; background: #171b23; padding: 1px 5px; border-radius: 4px;
+    }
+    pre {
+      background: #12161d; border: 1px solid #1e232d; border-radius: 10px;
+      padding: 18px 20px; overflow-x: auto; margin: 0 0 22px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13.5px; line-height: 1.7;
+    }
+    pre .tag { color: #7fb2ff; }
+    pre .attr { color: #e8c07d; }
+    pre .str { color: #9ad3a0; }
+    pre .com { color: #5d6675; }
+
+    /* Slider presentation on this page. */
+    flex-slider { margin-bottom: 20px; }
+    .stage { max-width: 720px; }
+    .stage-narrow { max-width: 520px; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 14.5px; margin: 0 0 12px; }
+    th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid #1b1f28; vertical-align: top; }
+    th { color: #8b93a7; font-weight: 600; font-size: 12px; letter-spacing: .07em; text-transform: uppercase; }
+    td:first-child { white-space: nowrap; }
+    tbody tr:hover { background: #141821; }
+
+    .buttons { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+    button.demo {
+      font: inherit; font-size: 14px; padding: 8px 15px; border-radius: 8px; cursor: pointer;
+      background: #1c222c; color: #dfe4ee; border: 1px solid #2a3140; transition: background .15s ease;
+    }
+    button.demo:hover { background: #232b38; }
+    button.demo:focus-visible { outline: 2px solid #6db3ff; outline-offset: 2px; }
+
+    #log {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px;
+      background: #12161d; border: 1px solid #1e232d; border-radius: 10px;
+      padding: 14px 16px; min-height: 72px; color: #9ad3a0; margin: 0; white-space: pre-wrap;
+    }
+
+    footer { padding: 40px 0 64px; color: #7f8798; font-size: 14px; border-top: 1px solid #1b1f28; }
+    footer a { color: #8ab6e8; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <p class="eyebrow">Web component · zero dependencies</p>
+    <h1>&lt;<span>flex-slider</span>&gt;</h1>
+    <p class="lede">
+      Drop plain images inside an element and it becomes a slider. No jQuery, no
+      stylesheet to load, no build step — the markup and styles live in a shadow
+      root, so nothing leaks in or out.
+    </p>
+    <ul class="pill-row">
+      <li class="pill">Custom elements v1</li>
+      <li class="pill">Shadow DOM</li>
+      <li class="pill">Slide &amp; fade</li>
+      <li class="pill">Touch &amp; keyboard</li>
+      <li class="pill">GPL-2.0</li>
+    </ul>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <section>
+    <h2>The whole API</h2>
+    <p class="title">Write HTML, get a slider</p>
+    <p class="note">
+      Every slider on this page is this shape. Attributes are optional; a bare
+      <code>&lt;flex-slider&gt;</code> shows the first image and nothing else.
+    </p>
+    <pre><span class="com">&lt;!-- one import, then plain markup --&gt;</span>
+&lt;<span class="tag">script</span> <span class="attr">type</span>=<span class="str">"module"</span> <span class="attr">src</span>=<span class="str">"../flex-slider.js"</span>&gt;&lt;/<span class="tag">script</span>&gt;
+
+&lt;<span class="tag">flex-slider</span> <span class="attr">animation</span>=<span class="str">"slide"</span> <span class="attr">autoplay</span> <span class="attr">interval</span>=<span class="str">"5000"</span> <span class="attr">nav</span> <span class="attr">pager</span> <span class="attr">pause-on-hover</span>&gt;
+  &lt;<span class="tag">img</span> <span class="attr">src</span>=<span class="str">"slide-1.jpg"</span> <span class="attr">alt</span>=<span class="str">"First slide"</span>&gt;
+  &lt;<span class="tag">img</span> <span class="attr">src</span>=<span class="str">"slide-2.jpg"</span> <span class="attr">alt</span>=<span class="str">"Second slide"</span>&gt;
+  &lt;<span class="tag">img</span> <span class="attr">src</span>=<span class="str">"slide-3.jpg"</span> <span class="attr">alt</span>=<span class="str">"Third slide"</span>&gt;
+&lt;/<span class="tag">flex-slider</span>&gt;</pre>
+  </section>
+
+  <section>
+    <h2>01 · Slideshow</h2>
+    <p class="title">Arrows, dots, autoplay</p>
+    <p class="note">Hover it to pause — <code>pause-on-hover</code> — and the track glides between slides on a CSS transform.</p>
+    <div class="stage">
+      <flex-slider id="hero" animation="slide" nav pager autoplay interval="4500" pause-on-hover label="Featured photography">
+        <img src="https://picsum.photos/id/1015/1200/675" alt="A river winding through a mountain valley">
+        <img src="https://picsum.photos/id/1016/1200/675" alt="Cliffs above a bay at dusk">
+        <img src="https://picsum.photos/id/1025/1200/675" alt="A pug resting on a blanket">
+        <img src="https://picsum.photos/id/1039/1200/675" alt="A waterfall seen from below">
+      </flex-slider>
+    </div>
+  </section>
+
+  <section>
+    <h2>02 · Cross-fade</h2>
+    <p class="title">Fade with a dot pager</p>
+    <p class="note">Set <code>animation="fade"</code> to stack the slides and cross-fade instead of translating them.</p>
+    <div class="stage">
+      <flex-slider animation="fade" pager slide-show-at="1" label="Fading gallery">
+        <img src="https://picsum.photos/id/1043/1200/675" alt="Forest path in morning light">
+        <img src="https://picsum.photos/id/1050/1200/675" alt="Snow-covered mountain ridge">
+        <img src="https://picsum.photos/id/1062/1200/675" alt="Aerial view of a coastline">
+      </flex-slider>
+    </div>
+  </section>
+
+  <section>
+    <h2>03 · Thumbnails</h2>
+    <p class="title">Thumbnail pager, dark theme, fixed height</p>
+    <p class="note">
+      <code>pager thumbs</code> builds a thumbnail strip from the same images.
+      <code>height</code> crops to a fixed box with <code>object-fit: cover</code>,
+      so mixed aspect ratios stay tidy.
+    </p>
+    <div class="stage">
+      <flex-slider nav pager thumbs theme="dark" height="340px" label="Thumbnail gallery">
+        <img src="https://picsum.photos/id/1069/1200/900" alt="Sunrise over the ocean">
+        <img src="https://picsum.photos/id/1074/1200/675" alt="A lioness in tall grass">
+        <img src="https://picsum.photos/id/1080/1200/800" alt="Strawberries in a bowl">
+        <img src="https://picsum.photos/id/1084/1200/675" alt="A whale breaching">
+      </flex-slider>
+    </div>
+  </section>
+
+  <section>
+    <h2>04 · Vertical</h2>
+    <p class="title">A column instead of a row</p>
+    <p class="note"><code>direction="vertical"</code> stacks the slides and moves the track up and down. Arrow keys, swipe and the pager all follow the axis.</p>
+    <div class="stage stage-narrow">
+      <flex-slider direction="vertical" pager nav height="420px" label="Vertical gallery">
+        <img src="https://picsum.photos/id/103/1200/800" alt="A row of parked bicycles">
+        <img src="https://picsum.photos/id/110/1200/800" alt="An empty country road at dawn">
+        <img src="https://picsum.photos/id/119/1200/800" alt="A camera on a wooden table">
+      </flex-slider>
+    </div>
+  </section>
+
+  <section>
+    <h2>05 · Scripting it</h2>
+    <p class="title">Methods, properties and events</p>
+    <p class="note">
+      The element is the API. Every button below drives the slider beside it,
+      and <code>slide-start</code> logs to the panel underneath.
+    </p>
+    <div class="buttons">
+      <button class="demo" data-action="prev">prev()</button>
+      <button class="demo" data-action="next">next()</button>
+      <button class="demo" data-action="goTo0">goTo(0)</button>
+      <button class="demo" data-action="goTo3">goTo(3)</button>
+      <button class="demo" data-action="play">play()</button>
+      <button class="demo" data-action="pause">pause()</button>
+      <button class="demo" data-action="reset">reset()</button>
+    </div>
+    <div class="stage">
+      <flex-slider id="api" nav pager animation="slide" label="Scriptable gallery">
+        <img src="https://picsum.photos/id/122/1200/675" alt="A lighthouse on a rocky shore">
+        <img src="https://picsum.photos/id/133/1200/675" alt="Fog rolling over a valley">
+        <img src="https://picsum.photos/id/142/1200/675" alt="A wooden pier at sunset">
+        <img src="https://picsum.photos/id/152/1200/675" alt="A desert road at midday">
+      </flex-slider>
+    </div>
+    <pre id="log">listening for slide-start…</pre>
+  </section>
+
+  <section>
+    <h2>06 · Everything else</h2>
+    <p class="title">Adding an image at runtime</p>
+    <p class="note">
+      Adding or removing an image updates the slider on its own: it watches its
+      children and rebuilds. Press the button to append a slide to the gallery below.
+    </p>
+    <div class="buttons">
+      <button class="demo" id="add-image">append an image</button>
+    </div>
+    <div class="stage">
+      <flex-slider id="live" nav pager loop label="Growing gallery">
+        <img src="https://picsum.photos/id/160/1200/675" alt="Green hills under cloud">
+        <img src="https://picsum.photos/id/164/1200/675" alt="A boat on still water">
+      </flex-slider>
+    </div>
+  </section>
+
+  <section>
+    <h2>Reference</h2>
+    <p class="title">Attributes</p>
+    <table>
+      <thead><tr><th>Attribute</th><th>Values</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td><code>animation</code></td><td><code>slide</code>, <code>fade</code></td><td>How slides change. Default <code>slide</code>.</td></tr>
+        <tr><td><code>duration</code></td><td>ms</td><td>Transition length. Default <code>700</code>.</td></tr>
+        <tr><td><code>easing</code></td><td>any CSS timing function</td><td>Default <code>ease</code>.</td></tr>
+        <tr><td><code>autoplay</code></td><td>present</td><td>Starts a slideshow on load.</td></tr>
+        <tr><td><code>interval</code></td><td>ms</td><td>Time between slides. Default <code>5000</code>.</td></tr>
+        <tr><td><code>pause-on-hover</code></td><td>present</td><td>Pauses while the pointer is over it.</td></tr>
+        <tr><td><code>nav</code></td><td>present</td><td>Shows the previous/next arrows.</td></tr>
+        <tr><td><code>pager</code></td><td>present</td><td>Shows the dot or thumbnail pager.</td></tr>
+        <tr><td><code>thumbs</code></td><td>present</td><td>Pager renders thumbnails instead of dots.</td></tr>
+        <tr><td><code>slide-show-at</code></td><td>index, 0-based</td><td>Slide to start on.</td></tr>
+        <tr><td><code>direction</code></td><td><code>horizontal</code>, <code>vertical</code></td><td>Axis the track moves along.</td></tr>
+        <tr><td><code>reverse</code></td><td>present</td><td>Animates the other way.</td></tr>
+        <tr><td><code>rtl</code></td><td>present</td><td>Mirrors arrows and layout.</td></tr>
+        <tr><td><code>swipe</code></td><td><code>on</code>, <code>off</code></td><td>Drag and swipe. On by default.</td></tr>
+        <tr><td><code>keyboard</code></td><td><code>on</code>, <code>off</code></td><td>Arrow keys, Home and End. On by default.</td></tr>
+        <tr><td><code>smooth-height</code></td><td>present</td><td>Animates the height between slides.</td></tr>
+        <tr><td><code>height</code></td><td>CSS length</td><td>Fixed box; images crop with <code>object-fit: cover</code>.</td></tr>
+        <tr><td><code>theme</code></td><td><code>light</code>, <code>dark</code></td><td>Arrow and pager colours.</td></tr>
+        <tr><td><code>loop</code></td><td>present</td><td>Wraps past the last slide.</td></tr>
+        <tr><td><code>label</code></td><td>string</td><td>Accessible name for the region.</td></tr>
+      </tbody>
+    </table>
+
+    <p class="title" style="margin-top:34px">Methods &amp; events</p>
+    <pre><span class="com">// methods</span>
+slider.next();            slider.prev();
+slider.goTo(2);           slider.play();
+slider.pause();           slider.refresh();   <span class="com">// re-read the images</span>
+slider.reset();           slider.currentIndex = 0;
+
+<span class="com">// events — both carry { index, slide, count } and cross the shadow boundary</span>
+slider.addEventListener(<span class="str">'slide-start'</span>, (e) =&gt; console.log(e.detail.index));
+slider.addEventListener(<span class="str">'slide-end'</span>,   (e) =&gt; console.log(e.detail.slide));</pre>
+
+    <p class="title" style="margin-top:34px">Theming</p>
+    <pre><span class="com">/* custom properties, set on the host */</span>
+flex-slider {
+  --fs-accent: #6db3ff;
+  --fs-arrow-bg: rgba(255, 255, 255, .9);
+  --fs-arrow-fg: #1f1f1f;
+  --fs-dot: rgba(255, 255, 255, .5);
+  --fs-dot-active: #fff;
+  --fs-radius: 12px;
+}
+
+<span class="com">/* or reach in by shadow part */</span>
+flex-slider::part(arrow-next) { width: 48px; height: 48px; }
+flex-slider::part(frame) { border-radius: 12px; }</pre>
+  </section>
+
+  <footer>
+    <p>
+      Built as a standalone, dependency-free rewrite of the classic
+      <a href="https://github.com/squidjam/FlexSlider">FlexSlider 2</a> image slider.
+      Component, styles and arrows are self-contained; no jQuery, no icon font,
+      no vendored CSS. Derived from FlexSlider 2 © WooThemes and released under
+      the same GPL-2.0-or-later licence — see <code>LICENSE.md</code>.
+    </p>
+  </footer>
+
+</div>
+
+<script type="module" src="../flex-slider.js"></script>
+<script type="module">
+  /* -------------------------------------------------- scripting example (05) */
+  const api = document.getElementById('api');
+  const log = document.getElementById('log');
+  let lines = [];
+  const write = (text) => {
+    lines = [text, ...lines].slice(0, 6);
+    log.textContent = lines.join('\n');
+  };
+
+  api.addEventListener('slide-start', (e) => {
+    write(`slide-start  index=${e.detail.index}  count=${e.detail.count}  slide=${e.detail.slide?.tagName ?? '—'}`);
+  });
+  api.addEventListener('slide-end', (e) => {
+    write(`slide-end    index=${e.detail.index}  count=${e.detail.count}`);
+  });
+
+  const actions = {
+    prev: () => api.prev(),
+    next: () => api.next(),
+    goTo0: () => api.goTo(0),
+    goTo3: () => api.goTo(3),
+    play: () => api.play(),
+    pause: () => api.pause(),
+    reset: () => api.reset()
+  };
+  for (const button of document.querySelectorAll('button[data-action]')) {
+    button.addEventListener('click', () => {
+      const action = button.dataset.action;
+      actions[action]();
+      write(`called ${action}()`);
+    });
+  }
+
+  /* ------------------------------------------------- live image swap (06) */
+  const live = document.getElementById('live');
+  const extra = [
+    ['https://picsum.photos/id/167/1200/675', 'A mountain lake at dusk'],
+    ['https://picsum.photos/id/173/1200/675', 'Pines in falling snow'],
+    ['https://picsum.photos/id/177/1200/675', 'A bridge over a river gorge']
+  ];
+  let added = 0;
+  document.getElementById('add-image').addEventListener('click', (event) => {
+    if (added >= extra.length) {
+      // Start over so the button keeps working.
+      for (const img of live.querySelectorAll('img[data-added]')) img.remove();
+      added = 0;
+      live.refresh();
+      return;
+    }
+    const [src, alt] = extra[added++];
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = alt;
+    img.dataset.added = 'true';
+    live.appendChild(img);
+    img.complete
+      ? live.refresh()
+      : img.addEventListener('load', () => live.refresh(), { once: true });
+  });
+</script>
+</body>
+</html>
