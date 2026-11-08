@@ -33,7 +33,7 @@
  *   smooth-height   animate container height        (default off)
  *   height          fixed track height, e.g. "420px"(default aspect-driven)
  *   theme           "light" | "dark"                (default "light")
- *   loop            wrap past the last slide        (default off)
+ *   loop            "on" | "off"                  (default "on")
  *   label           accessible name for the region
  *   prev-label      accessible name for the prev arrow
  *   next-label      accessible name for the next arrow
@@ -104,10 +104,6 @@ const TEMPLATE = /* html */ `
     flex-direction: column;
     flex-wrap: nowrap;
   }
-  :host([rtl]:not([direction="vertical"]):not([reverse])) .track,
-  :host(:not([rtl]):not([direction="vertical"])[reverse]) .track {
-    flex-direction: row-reverse;
-  }
   .track.instant { transition: none; }
   slot { display: none; }
 
@@ -165,6 +161,7 @@ const TEMPLATE = /* html */ `
     transition-property: opacity;
     transition-timing-function: ease;
   }
+  .slide.instant { transition: none !important; }
   :host([animation="fade"]) .slide.is-active { opacity: 1; }
   :host([animation="fade"]) .slide:first-child { position: relative; }
 
@@ -323,10 +320,10 @@ class FlexSlider extends HTMLElement {
 
     this._slot.addEventListener('slotchange', () => this.refresh());
 
-    this._track.addEventListener('pointerdown', this._onPointerDown);
-    this._frame.addEventListener('pointermove', this._onPointerMove);
-    this._frame.addEventListener('pointerup', this._onPointerUp);
-    this._frame.addEventListener('pointercancel', this._onPointerUp);
+    this._frame.addEventListener('pointerdown', (event) => this._onPointerDown(event));
+    this._frame.addEventListener('pointermove', (event) => this._onPointerMove(event));
+    this._frame.addEventListener('pointerup', (event) => this._onPointerUp(event));
+    this._frame.addEventListener('pointercancel', (event) => this._onPointerUp(event));
     this.addEventListener('dragstart', (e) => e.preventDefault());
 
     this._frame.tabIndex = 0;
@@ -398,6 +395,9 @@ class FlexSlider extends HTMLElement {
         break;
       case 'rtl':
       case 'reverse':
+        this._applyLayout();
+        this._move(true);
+        break;
       case 'loop':
         this._move(true);
         break;
@@ -444,8 +444,8 @@ class FlexSlider extends HTMLElement {
     if (count === 0) return;
 
     let target = Number.isFinite(Number(index)) ? Math.trunc(Number(index)) : this._index;
-    if (target < 0) target = this.hasAttribute('loop') ? count - 1 : 0;
-    if (target > count - 1) target = this.hasAttribute('loop') ? 0 : count - 1;
+    if (target < 0) target = this._loopEnabled() ? count - 1 : 0;
+    if (target > count - 1) target = this._loopEnabled() ? 0 : count - 1;
     target = clamp(target, 0, count - 1);
 
     if (!instant && target === this._index) return;
@@ -468,7 +468,7 @@ class FlexSlider extends HTMLElement {
     const rawInterval = Number(this.getAttribute('interval'));
     const interval = Number.isFinite(rawInterval) && rawInterval > 0 ? rawInterval : 5000;
     this._timer = setInterval(() => {
-      if (this.hasAttribute('loop') || this._index < this._pages.length - 1) this.next();
+      if (this._loopEnabled() || this._index < this._pages.length - 1) this.next();
       else this.pause();
     }, interval);
   }
@@ -496,7 +496,6 @@ class FlexSlider extends HTMLElement {
     this._pages.forEach((page) => page.remove());
     this._pages = [];
     this._dots = [];
-    this._track.replaceChildren(this._slot);
 
     // The originals are the markup, not the UI: keep them in the light DOM but
     // out of the way of the accessibility tree, clicks and the tab order.
@@ -562,9 +561,11 @@ class FlexSlider extends HTMLElement {
   }
 
   _applyLayout() {
-    const rawDuration = Number(this.getAttribute('duration'));
+    const durationAttribute = this.getAttribute('duration');
+    const rawDuration = durationAttribute === null ? NaN : Number(durationAttribute);
     const duration = Number.isFinite(rawDuration) && rawDuration >= 0 ? rawDuration : 700;
     const easing = this.getAttribute('easing') || 'ease';
+    this._applyTrackDirection();
     this._track.style.transitionDuration = `${duration}ms`;
     this._track.style.transitionTimingFunction = easing;
     this._pages.forEach((page) => {
@@ -628,6 +629,15 @@ class FlexSlider extends HTMLElement {
     return this.getAttribute('direction') === 'vertical' ? 'Y' : 'X';
   }
 
+  _loopEnabled() {
+    return this.getAttribute('loop') !== 'off';
+  }
+
+  _applyTrackDirection() {
+    const reverse = this.hasAttribute('rtl') !== this.hasAttribute('reverse');
+    this._track.style.flexDirection = this._axis() === 'Y' ? 'column' : reverse ? 'row-reverse' : 'row';
+  }
+
   _offsetOf(element) {
     if (this._axis() === 'Y') return element.offsetTop || 0;
     return element.offsetLeft || 0;
@@ -637,12 +647,15 @@ class FlexSlider extends HTMLElement {
     const active = this._pages[this._index];
     if (!active) return;
 
+    this._applyTrackDirection();
     const distance = this._offsetOf(active);
 
     if (instant) {
       this._track.classList.add('instant');
+      this._pages.forEach((page) => page.classList.add('instant'));
     } else {
       this._track.classList.remove('instant');
+      this._pages.forEach((page) => page.classList.remove('instant'));
     }
 
     this._track.style.transform = this._axis() === 'Y'
@@ -656,11 +669,16 @@ class FlexSlider extends HTMLElement {
 
     this._applyHeight();
     this._renderArrows();
+    if (instant) {
+      this._track.getBoundingClientRect();
+      this._track.classList.remove('instant');
+      this._pages.forEach((page) => page.classList.remove('instant'));
+    }
   }
 
   _renderArrows() {
     const show = this.hasAttribute('nav') && this._pages.length > 1;
-    const loop = this.hasAttribute('loop');
+    const loop = this._loopEnabled();
     this._prevBtn.hidden = !show;
     this._nextBtn.hidden = !show;
     this._prevBtn.disabled = !loop && this._index === 0;

@@ -7,6 +7,9 @@
  */
 
 export const results = { passed: 0, failed: 0, cases: [], done: false };
+const fixtureTemplates = new Map(
+  [...document.querySelectorAll('#fixtures flex-slider')].map((slider) => [slider.id, slider.cloneNode(true)])
+);
 
 /* ------------------------------------------------------------------ reporting */
 
@@ -152,10 +155,12 @@ export function click(element) {
 
 /** Freshly rebuilds a fixture so tests never inherit each other's state. */
 export function reset(id) {
-  const original = document.getElementById(id);
-  const clone = original.cloneNode(true);
-  original.replaceWith(clone);
-  return document.getElementById(id);
+  const current = document.getElementById(id);
+  const template = fixtureTemplates.get(id);
+  if (!current || !template) throw new Error(`Unknown slider fixture: ${id}`);
+  const clone = template.cloneNode(true);
+  current.replaceWith(clone);
+  return clone;
 }
 
 /* ------------------------------------------------------------- suite loading */

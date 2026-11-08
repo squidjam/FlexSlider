@@ -3,7 +3,7 @@
  */
 
 import {
-  assert, test, group, tick, settle, shadow, activeSlide,
+  assert, test, group, tick, settle, shadow, activeSlide, results,
   transformX, transformY, swipe, press, click, reset
 } from './harness.js';
 
@@ -159,22 +159,35 @@ await test('next() and prev() move one slide', async () => {
 
 await test('navigation stops at the ends', async () => {
   const slider = reset('fx-plain');
+  slider.setAttribute('loop', 'off');
   slider.prev();
   assert.equal(slider.currentIndex, 0, 'prev at the start is a no-op');
   for (let i = 0; i < 6; i++) slider.next();
   assert.equal(slider.currentIndex, 2, 'next at the end is a no-op');
 });
 
-await test('loop wraps in both directions', async () => {
-  const slider = reset('fx-loop');
+await test('loop wraps by default in both directions', async () => {
+  const slider = reset('fx-plain');
+  assert.equal(slider.hasAttribute('loop'), false, 'the fixture has no loop attribute');
   slider.prev();
-  assert.equal(slider.currentIndex, 1, 'prev wraps to the last slide');
+  assert.equal(slider.currentIndex, 2, 'prev wraps to the last slide');
   slider.next();
   assert.equal(slider.currentIndex, 0, 'next wraps to the first slide');
 });
 
+await test('loop="off" disables wrapping', async () => {
+  const slider = reset('fx-loop');
+  slider.setAttribute('loop', 'off');
+  slider.prev();
+  assert.equal(slider.currentIndex, 0, 'prev stops at the first slide');
+  slider.goTo(1);
+  slider.next();
+  assert.equal(slider.currentIndex, 1, 'next stops at the last slide');
+});
+
 await test('goTo clamps out-of-range indexes', async () => {
   const slider = reset('fx-plain');
+  slider.setAttribute('loop', 'off');
   slider.goTo(2);
   assert.equal(slider.currentIndex, 2, 'valid index');
   slider.goTo(-4);
@@ -190,7 +203,8 @@ await test('currentIndex is settable', async () => {
 });
 
 await test('arrows step through slides when clicked', async () => {
-  const slider = reset('fx-loop');
+  const slider = reset('fx-plain');
+  slider.setAttribute('nav', '');
   await settle();
   const next = shadow(slider).querySelector('.arrow.next');
   const prev = shadow(slider).querySelector('.arrow.prev');
@@ -199,10 +213,14 @@ await test('arrows step through slides when clicked', async () => {
   assert.equal(slider.currentIndex, 1, 'next arrow');
   click(prev);
   assert.equal(slider.currentIndex, 0, 'prev arrow');
+  slider.goTo(2);
+  click(next);
+  assert.equal(slider.currentIndex, 0, 'next arrow wraps by default');
 });
 
 await test('arrows disable at the ends without loop', async () => {
   const slider = reset('fx-options');
+  slider.setAttribute('loop', 'off');
   await settle();
   const prev = shadow(slider).querySelector('.arrow.prev');
   const next = shadow(slider).querySelector('.arrow.next');
@@ -340,6 +358,7 @@ await test('pause stops the slideshow', async () => {
 });
 
 await test('hover pauses and leaving resumes', async () => {
+  if (!window.matchMedia('(hover: hover)').matches) return;
   const slider = reset('fx-options');
   await tick(50);
   const frame = shadow(slider).querySelector('.frame');
@@ -488,6 +507,21 @@ await test('adding an image rebuilds the track', async () => {
   slider.appendChild(extra);
   await tick(60);
   assert.equal(shadow(slider).querySelectorAll('.slide').length, 4, 'the new slide is built');
+});
+
+await test('refresh does not retrigger slotchange', async () => {
+  const slider = reset('fx-plain');
+  await settle();
+  const slideCount = slider.slides.length;
+  const slot = shadow(slider).querySelector('slot');
+  let slotChanges = 0;
+  slot.addEventListener('slotchange', () => slotChanges++);
+
+  slider.refresh();
+  await tick(50);
+
+  assert.equal(slotChanges, 0, 'refresh keeps source images assigned to the existing slot');
+  assert.equal(shadow(slider).querySelectorAll('.slide').length, slideCount, 'slides are still rebuilt');
 });
 
 await test('documented attributes update after connection', async () => {

@@ -60,11 +60,11 @@ automatically; call `refresh()` if you change a `src` in place.
 | `smooth-height` | present | off | animates the container height |
 | `height` | any CSS length | auto | fixed box; images crop with `object-fit: cover` |
 | `theme` | `light`, `dark` | `light` | arrow and pager colours |
-| `loop` | present | off | wraps past the last slide |
+| `loop` | `on`, `off` | `on` | wraps by default; `off` stops at the ends |
 | `label` | string | none | accessible name for the region |
 | `prev-label`, `next-label` | string | "Previous/Next slide" | arrow button labels |
 
-Booleans are presence-based: `nav` turns arrows on, leaving it out turns them off.
+Most booleans are presence-based: `nav` turns arrows on, leaving it out turns them off. Looping is on by default; use `loop="off"` to stop at the ends.
 
 ## Methods, properties and events
 
